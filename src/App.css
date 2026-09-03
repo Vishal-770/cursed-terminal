@@ -1,0 +1,91 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body, html {
+  width: 100%;
+  height: 100%;
+  background-color: #000000;
+  color: #e5e7eb;
+  font-family: monospace, 'Courier New', Courier;
+  overflow: hidden;
+  user-select: text;
+}
+
+.terminal-screen {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #000000;
+  overflow: hidden;
+  padding: 12px;
+}
+
+.terminal-logs {
+  flex: 1;
+  overflow-y: auto;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+/* Authentic terminal log styling */
+.log-line {
+  margin-bottom: 3px;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.log-line.system {
+  color: #60a5fa;
+}
+
+.log-line.input {
+  color: #ffffff;
+}
+
+.log-line.output {
+  color: #e5e7eb;
+}
+
+.log-line.troll {
+  color: #f87171;
+}
+
+.prompt-prefix {
+  color: #22c55e;
+  font-weight: bold;
+}
+
+.input-row {
+  display: flex;
+  align-items: center;
+  margin-top: 2px;
+}
+
+.cli-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 14px;
+  caret-color: #22c55e;
+  margin-left: 6px;
+}
+
+/* Minimal raw scrollbar */
+.terminal-logs::-webkit-scrollbar {
+  width: 6px;
+}
+
+.terminal-logs::-webkit-scrollbar-track {
+  background: #000000;
+}
+
+.terminal-logs::-webkit-scrollbar-thumb {
+  background: #333333;
+}
