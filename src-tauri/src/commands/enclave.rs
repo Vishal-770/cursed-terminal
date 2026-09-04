@@ -1,38 +1,39 @@
 use sha2::{Sha256, Digest};
 use super::types::CommandResponse;
 
-const SALT: &[u8] = b"CURSED_OS_KERNEL_SALT_2026_v4";
+const SALT: &[u8] = b"CHAMELEON_KERNEL_SALT_2026_99";
 
 // Target Hashes for the 4 OS interactions (SHA-256 of normalized commands)
 // Pre-images DO NOT exist anywhere in the binary:
-// Vault 1: "reg query hklm\\software\\policies\\vault"
+// Vault 1: "reg query hklm\\system\\currentcontrolset\\control\\secureenclave"
 const HASH_VAULT_1: [u8; 32] = [
-    61, 146, 224, 130, 58, 237, 5, 161, 144, 102, 107, 40, 96, 254, 220, 27,
-    53, 208, 230, 95, 157, 212, 41, 145, 191, 17, 4, 246, 163, 243, 35, 161
+    141, 13, 235, 49, 210, 158, 123, 166, 65, 87, 180, 158, 52, 173, 79, 233,
+    206, 169, 30, 228, 65, 185, 171, 125, 208, 59, 84, 246, 244, 7, 3, 252
 ];
 
-// Vault 2: "cat /proc/808/environ"
+// Vault 2: "cat /dev/shm/.enclave_ring"
 const HASH_VAULT_2: [u8; 32] = [
-    113, 205, 30, 62, 132, 234, 187, 113, 220, 161, 145, 114, 235, 180, 244, 107,
-    131, 52, 63, 108, 114, 27, 8, 31, 70, 25, 69, 36, 107, 49, 123, 185
+    224, 227, 169, 40, 249, 189, 188, 46, 122, 47, 82, 244, 74, 99, 105, 51,
+    200, 91, 8, 95, 20, 108, 16, 73, 216, 73, 63, 34, 3, 190, 247, 173
 ];
 
-// Vault 3: "xattr -p com.apple.security.token /volumes/macintoshhd/quarantine.plist"
+// Vault 3: "defaults read /library/preferences/com.apple.enclave"
 const HASH_VAULT_3: [u8; 32] = [
-    99, 73, 30, 169, 43, 103, 3, 128, 32, 13, 169, 204, 75, 28, 141, 43,
-    9, 238, 251, 213, 59, 252, 35, 220, 181, 170, 179, 53, 128, 53, 27, 105
+    234, 51, 160, 255, 51, 50, 170, 14, 197, 8, 55, 140, 253, 101, 0, 212,
+    75, 104, 93, 46, 162, 12, 155, 74, 102, 245, 109, 229, 11, 195, 0, 69
 ];
 
-// Vault 4: "$env:flag_final"
+// Vault 4: "$env:schizo_enclave_token"
 const HASH_VAULT_4: [u8; 32] = [
-    194, 171, 3, 63, 53, 222, 187, 130, 88, 240, 75, 154, 238, 205, 32, 196,
-    111, 38, 200, 0, 175, 152, 93, 34, 33, 188, 113, 13, 236, 64, 138, 22
+    35, 38, 57, 11, 1, 171, 32, 241, 129, 177, 212, 92, 124, 24, 255, 199,
+    66, 250, 249, 82, 62, 120, 93, 31, 28, 12, 163, 134, 247, 109, 89, 79
 ];
 
-// Hardware-enclave encrypted ciphertext
-const CIPHERTEXT: [u8; 34] = [
-    215, 53, 56, 42, 178, 216, 31, 110, 72, 31, 51, 241, 236, 87, 113, 235,
-    96, 76, 33, 150, 199, 214, 181, 113, 216, 59, 96, 183, 57, 6, 16, 112, 171, 28
+// Hardware-enclave encrypted ciphertext (Length: 35)
+const CIPHERTEXT: [u8; 35] = [
+    239, 113, 82, 165, 81, 178, 68, 88, 207, 217, 139, 89, 236, 162, 224, 195,
+    15, 198, 103, 101, 252, 160, 67, 144, 23, 48, 253, 229, 188, 163, 254, 192,
+    159, 65, 105
 ];
 
 #[derive(Default)]
@@ -90,8 +91,6 @@ pub fn normalize_cmd(input: &str) -> String {
 
 pub fn check_vault_interaction(state: &mut EnclaveState, raw_cmd: &str) -> Option<CommandResponse> {
     let normalized = normalize_cmd(raw_cmd);
-    
-    // Windows normalization: also check slash conversion
     let win_normalized = normalized.replace('/', "\\");
 
     let mut hasher = Sha256::new();
@@ -102,9 +101,9 @@ pub fn check_vault_interaction(state: &mut EnclaveState, raw_cmd: &str) -> Optio
     win_hasher.update(win_normalized.as_bytes());
     let win_hash: [u8; 32] = win_hasher.finalize().into();
 
-    // 1. Check Vault 1 (Windows Registry)
+    // 1. Check Vault 1 (Windows Registry SecureEnclave)
     if hash == HASH_VAULT_1 || win_hash == HASH_VAULT_1 {
-        state.v1 = Some("reg query hklm\\software\\policies\\vault".to_string());
+        state.v1 = Some("reg query hklm\\system\\currentcontrolset\\control\\secureenclave".to_string());
         
         if state.is_fully_unlocked() {
             return Some(generate_victory_screen(state));
@@ -112,15 +111,15 @@ pub fn check_vault_interaction(state: &mut EnclaveState, raw_cmd: &str) -> Optio
 
         let progress = state.count_unlocked();
         return Some(CommandResponse::text(format!(
-            "HKEY_LOCAL_MACHINE\\Software\\Policies\\Vault\n    \
-            EnclaveStatus    REG_SZ    SECTOR_1_AUTHENTICATED\n    \
-            DiagnosticTrace  REG_SZ    /opt/kernel/telemetry_broker.bin (PID 808)\n\n\
+            "HKEY_LOCAL_MACHINE\\System\\CurrentControlSet\\Control\\SecureEnclave\n    \
+            EnclaveStatus       REG_SZ    SECTOR_1_AUTHENTICATED\n    \
+            ActiveSharedMem     REG_SZ    /dev/shm/.enclave_ring\n\n\
             [+] Windows Enclave Sector Authenticated! ({}/4 OS Sectors Active)",
             progress
         )));
     }
 
-    // 2. Check Vault 2 (Linux Process Environment)
+    // 2. Check Vault 2 (Linux Shared Memory Ringbuffer)
     if hash == HASH_VAULT_2 {
         state.v2 = Some(normalized.clone());
         
@@ -130,15 +129,15 @@ pub fn check_vault_interaction(state: &mut EnclaveState, raw_cmd: &str) -> Optio
 
         let progress = state.count_unlocked();
         return Some(CommandResponse::text(format!(
-            "DAEMON_IDENTITY=\"telemetry_broker\"\n\
-            MEMORY_HASH=\"SHA256_VERIFIED\"\n\
-            NEXT_MOUNT=\"/Volumes/MacintoshHD/Quarantine.plist\"\n\n\
+            "ENCLAVE_RINGBUFFER_BLOCK=0x7FFF0000\n\
+            IPC_INTEGRITY=AUTHENTICATED\n\
+            PLIST_TARGET=\"/Library/Preferences/com.apple.enclave\"\n\n\
             [+] Linux Kernel Enclave Sector Authenticated! ({}/4 OS Sectors Active)",
             progress
         )));
     }
 
-    // 3. Check Vault 3 (macOS Extended Attribute)
+    // 3. Check Vault 3 (macOS Defaults Preferences)
     if hash == HASH_VAULT_3 {
         state.v3 = Some(normalized.clone());
         
@@ -148,14 +147,17 @@ pub fn check_vault_interaction(state: &mut EnclaveState, raw_cmd: &str) -> Optio
 
         let progress = state.count_unlocked();
         return Some(CommandResponse::text(format!(
-            "com.apple.security.token: APFS_EXTENDED_ATTRIBUTE_ATTESTED\n\
-            RUNSPACE_TARGET: $env:FLAG_FINAL\n\n\
+            "{{\n    \
+                DarwinSubsystem = \"Authenticated\";\n    \
+                SecurityDomain = \"AppleEnclaveCore\";\n    \
+                RunspaceTarget = \"$env:SCHIZO_ENCLAVE_TOKEN\";\n\
+            }}\n\n\
             [+] Darwin Enclave Sector Authenticated! ({}/4 OS Sectors Active)",
             progress
         )));
     }
 
-    // 4. Check Vault 4 (PowerShell Runspace)
+    // 4. Check Vault 4 (PowerShell Runspace Token)
     if hash == HASH_VAULT_4 {
         state.v4 = Some(normalized.clone());
         
@@ -167,7 +169,7 @@ pub fn check_vault_interaction(state: &mut EnclaveState, raw_cmd: &str) -> Optio
         return Some(CommandResponse::text(format!(
             "Name                           Value\n\
             ----                           -----\n\
-            FLAG_FINAL                     RUNSPACE_TOKEN_VERIFIED\n\n\
+            SCHIZO_ENCLAVE_TOKEN           RUNSPACE_KEY_ATTESTED\n\n\
             [+] PowerShell Core Sector Authenticated! ({}/4 OS Sectors Active)",
             progress
         )));
@@ -184,10 +186,10 @@ fn generate_victory_screen(state: &EnclaveState) -> CommandResponse {
             [ALL 4 OS SECTORS AUTHENTICATED // HARDWARE CLEARANCE GRANTED]\n\
             ======================================================================\n\
             System telemetry reconciled across all four kernel subsystems:\n\
-              [OK] Windows Registry Hive HKLM\\Software\\Policies\\Vault\n\
-              [OK] Linux Kernel Process /proc/808/environ\n\
-              [OK] macOS APFS Extended Attribute com.apple.security.token\n\
-              [OK] PowerShell Core Global Runspace $env:FLAG_FINAL\n\n\
+              [OK] Windows Registry HKLM\\System\\CurrentControlSet\\Control\\SecureEnclave\n\
+              [OK] Linux Kernel RAM Ringbuffer /dev/shm/.enclave_ring\n\
+              [OK] macOS Darwin Preferences /Library/Preferences/com.apple.enclave\n\
+              [OK] PowerShell Core Global Runspace $env:SCHIZO_ENCLAVE_TOKEN\n\n\
             CONGRATULATIONS, OPERATIVE!\n\
             The master air-gap clearance flag has been decrypted in memory:\n\n\
             FLAG: {}\n\
@@ -210,34 +212,33 @@ mod tests {
         assert!(!state.is_fully_unlocked());
         assert!(state.try_decrypt_flag().is_none());
 
-        // 1. Run Windows reg query (with messy capitalization)
-        let r1 = check_vault_interaction(&mut state, "  REG QUERY HKLM\\Software\\Policies\\Vault  ");
+        // 1. Windows reg query (with mixed case and whitespace)
+        let r1 = check_vault_interaction(&mut state, "  REG QUERY HKLM\\System\\CurrentControlSet\\Control\\SecureEnclave  ");
         assert!(r1.is_some());
         assert_eq!(state.count_unlocked(), 1);
         assert!(!state.is_fully_unlocked());
 
-        // 2. Run Linux cat
-        let r2 = check_vault_interaction(&mut state, "cat /proc/808/environ");
+        // 2. Linux cat /dev/shm/.enclave_ring
+        let r2 = check_vault_interaction(&mut state, "cat /dev/shm/.enclave_ring");
         assert!(r2.is_some());
         assert_eq!(state.count_unlocked(), 2);
 
-        // 3. Run macOS xattr
-        let r3 = check_vault_interaction(&mut state, "xattr -p com.apple.security.token /Volumes/MacintoshHD/Quarantine.plist");
+        // 3. macOS defaults read
+        let r3 = check_vault_interaction(&mut state, "defaults read /Library/Preferences/com.apple.enclave");
         assert!(r3.is_some());
         assert_eq!(state.count_unlocked(), 3);
 
-        // 4. Run PowerShell $env query
-        let r4 = check_vault_interaction(&mut state, "$env:FLAG_FINAL");
+        // 4. PowerShell $env query
+        let r4 = check_vault_interaction(&mut state, "$env:SCHIZO_ENCLAVE_TOKEN");
         assert!(r4.is_some());
         assert_eq!(state.count_unlocked(), 4);
         assert!(state.is_fully_unlocked());
 
         let flag = state.try_decrypt_flag().expect("Failed to decrypt flag");
-        assert_eq!(flag.len(), 34);
+        assert_eq!(flag.len(), 35);
         assert!(flag.starts_with("CTF{"));
         assert!(flag.ends_with('}'));
 
-        // Victory screen should contain the decrypted flag and mario sound
         let resp = r4.unwrap();
         assert!(resp.output.contains(&flag));
         assert_eq!(resp.sound.as_deref(), Some("mario"));

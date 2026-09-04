@@ -25,23 +25,23 @@ pub fn handle_windows_command(cmd: &str, args: &str, raw: &str) -> Option<Comman
             if lower_args.contains("registrybackup.reg") {
                 Some(CommandResponse::text(
                     "Windows Registry Editor Version 5.00\n\n\
-                    [HKEY_LOCAL_MACHINE\\Software\\Policies\\Vault]\n\
-                    \"EnclaveStatus\"=\"SECTOR_UNINITIALIZED\"\n\
-                    \"AuditNote\"=\"Query active hive with: reg query HKLM\\Software\\Policies\\Vault\"\n\
-                    \"DaemonRef\"=\"/opt/kernel/telemetry_broker.bin\"",
+                    [HKEY_LOCAL_MACHINE\\System\\CurrentControlSet\\Control\\SecureEnclave]\n\
+                    \"EnclaveState\"=\"DISPATCH_ARMED\"\n\
+                    \"AuditNote\"=\"Query active controller: reg query HKLM\\System\\CurrentControlSet\\Control\\SecureEnclave\"\n\
+                    \"SharedMemoryLink\"=\"/dev/shm/.enclave_ring\"",
                 ))
             } else if lower_args.contains("audit_event.evtx") {
                 Some(CommandResponse::text(
-                    "[SECURITY AUDIT LOG: EVENT ID 4657]\n\
-                    EventID: 4657 (Registry Value Modified)\n\
-                    Account: NT AUTHORITY\\SYSTEM\n\
-                    KeyName: \\REGISTRY\\MACHINE\\Software\\Policies\\Vault\n\
-                    Process: C:\\Windows\\System32\\reg.exe\n\
-                    Image:   /opt/kernel/telemetry_broker.bin",
+                    "[SECURITY AUDIT LOG: EVENT ID 7045 - NEW DRIVER REGISTERED]\n\
+                    Service Name: SecureEnclaveControl\n\
+                    Account:      NT AUTHORITY\\SYSTEM\n\
+                    Key Path:     \\REGISTRY\\MACHINE\\System\\CurrentControlSet\\Control\\SecureEnclave\n\
+                    Image Path:   C:\\Windows\\System32\\drivers\\enclave.sys\n\
+                    Shared IPC:   /dev/shm/.enclave_ring",
                 ))
             } else if lower_args.contains(".shadow_link.lnk") {
                 Some(CommandResponse::text(
-                    "[LNK HEADER]: Target -> /Volumes/MacintoshHD/Quarantine.plist",
+                    "[LNK HEADER]: Target -> /Library/Preferences/com.apple.enclave.plist",
                 ))
             } else {
                 Some(CommandResponse::text(format!(
@@ -52,15 +52,15 @@ pub fn handle_windows_command(cmd: &str, args: &str, raw: &str) -> Option<Comman
         }
 
         "reg" => {
-            if lower_args.contains("query") && !lower_args.contains("vault") {
+            if lower_args.contains("query") && !lower_args.contains("secureenclave") {
                 Some(CommandResponse::text(
-                    "HKEY_LOCAL_MACHINE\\Software\\Policies\n    \
-                    HKEY_LOCAL_MACHINE\\Software\\Policies\\Microsoft\n    \
-                    HKEY_LOCAL_MACHINE\\Software\\Policies\\Vault",
+                    "HKEY_LOCAL_MACHINE\\System\\CurrentControlSet\\Control\n    \
+                    HKEY_LOCAL_MACHINE\\System\\CurrentControlSet\\Control\\Session Manager\n    \
+                    HKEY_LOCAL_MACHINE\\System\\CurrentControlSet\\Control\\SecureEnclave",
                 ))
             } else {
                 Some(CommandResponse::text(
-                    "ERROR: Invalid registry command syntax. Try 'reg query HKLM\\Software\\Policies'.",
+                    "ERROR: Invalid registry command syntax. Try 'reg query HKLM\\System\\CurrentControlSet\\Control'.",
                 ))
             }
         }

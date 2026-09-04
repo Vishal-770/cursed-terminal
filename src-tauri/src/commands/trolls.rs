@@ -127,7 +127,8 @@ pub fn handle_troll_command(cmd: &str, raw: &str) -> Option<CommandResponse> {
             [    0.412089] ACPI: DSDT 0x000000007FFF0000 (Cross-Mounted to Windows System32)\n\
             [    1.094120] APFS: Found Apple APFS Container at /dev/disk3s1 (macOS)\n\
             [    1.849120] REGISTRY: Initialized Windows HKLM storage mapping\n\
-            [    2.110294] SYSTEM: Spawned telemetry_broker daemon on worker thread\n\
+            [    2.110294] SYSTEM: Initialized Chameleon Core kernel bridge\n\
+            [    2.110305] KERNEL: Shared IPC ringbuffer mounted at /dev/shm/.enclave_ring\n\
             [    3.901294] System ready on tty1. Welcome to Schizophrenic Terminal.",
         ));
     }

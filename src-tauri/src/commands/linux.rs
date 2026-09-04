@@ -96,10 +96,9 @@ pub fn handle_linux_command(cmd: &str, args: &str, _raw: &str) -> Option<Command
 
         "find" => {
             Some(CommandResponse::text(
-                "/etc/.shadow_cache\n\
-                /proc/808/environ\n\
-                /Volumes/MacintoshHD/Quarantine.plist\n\
-                C:\\root/enclave/RegistryBackup.reg",
+                "/dev/shm/.enclave_ring\n\
+                /Library/Preferences/com.apple.enclave.plist\n\
+                C:\\root\\enclave\\RegistryBackup.reg",
             ))
         }
 

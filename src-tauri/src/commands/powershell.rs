@@ -5,14 +5,14 @@ pub fn handle_powershell_command(cmd: &str, args: &str, raw: &str) -> Option<Com
     let lower_args = args.to_lowercase();
     let raw_lower = raw.to_lowercase();
 
-    // Direct environment query: $env:FLAG_FINAL, $env:flag, etc.
-    if raw_lower.starts_with("$env:") && !raw_lower.contains("flag_final") {
+    // Direct environment query: $env:SCHIZO_ENCLAVE_TOKEN, etc.
+    if raw_lower.starts_with("$env:") && !raw_lower.contains("schizo_enclave_token") {
         return Some(CommandResponse::text(
             "Name                           Value\n\
             ----                           -----\n\
             OS                             Windows_NT\n\
             PATH                           C:\\Windows\\System32;C:\\Windows\n\
-            RUNSPACE_TARGET                $env:FLAG_FINAL",
+            RUNSPACE_TARGET                $env:SCHIZO_ENCLAVE_TOKEN",
         ));
     }
 
@@ -26,7 +26,7 @@ pub fn handle_powershell_command(cmd: &str, args: &str, raw: &str) -> Option<Com
                     HOMEDRIVE                      C:\\\n\
                     PROCESSOR_ARCHITECTURE         AMD64\n\
                     PSExecutionPolicyPreference    Unrestricted\n\
-                    RUNSPACE_TARGET                $env:FLAG_FINAL",
+                    RUNSPACE_TARGET                $env:SCHIZO_ENCLAVE_TOKEN",
                 ))
             } else {
                 Some(CommandResponse::text(
@@ -46,7 +46,7 @@ pub fn handle_powershell_command(cmd: &str, args: &str, raw: &str) -> Option<Com
                 ----                           -----\n\
                 MaximumHistoryCount            4096\n\
                 PSCulture                      en-US\n\
-                RUNSPACE_TARGET                $env:FLAG_FINAL",
+                RUNSPACE_TARGET                $env:SCHIZO_ENCLAVE_TOKEN",
             ))
         }
 

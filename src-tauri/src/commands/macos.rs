@@ -45,7 +45,8 @@ pub fn handle_macos_command(cmd: &str, args: &str, _raw: &str) -> Option<Command
                 "{\n    \
                 AppleInterfaceStyle = Dark;\n    \
                 AppleLanguages = (en);\n    \
-                ExportTarget = \"FLAG_FINAL\";\n\
+                ActivePreferences = \"/Library/Preferences/com.apple.enclave\";\n    \
+                RunspaceTarget = \"$env:SCHIZO_ENCLAVE_TOKEN\";\n\
                 }",
             ))
         }
@@ -53,7 +54,7 @@ pub fn handle_macos_command(cmd: &str, args: &str, _raw: &str) -> Option<Command
         "launchctl" => {
             Some(CommandResponse::text(
                 "PID     Status  Label\n\
-                808     0       com.enclave.telemetry-broker\n\
+                1337    0       com.apple.enclave.chameleon\n\
                 1       0       com.apple.launchd\n\
                 -       0       com.microsoft.powershell.daemon",
             ))
