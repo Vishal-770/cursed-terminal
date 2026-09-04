@@ -15,13 +15,10 @@ pub fn handle_macos_command(cmd: &str, args: &str, _raw: &str) -> Option<Command
         }
 
         "xattr" => {
-            if lower_args.contains("-p") && (lower_args.contains("token") || lower_args.contains("security") || lower_args.contains("quarantine")) {
+            if lower_args.contains("-l") {
                 Some(CommandResponse::text(
-                    "y0u_3v3n_",
-                ))
-            } else if lower_args.contains("-l") {
-                Some(CommandResponse::text(
-                    "com.apple.quarantine\n\
+                    "/Volumes/MacintoshHD/Quarantine.plist:\n\
+                    com.apple.quarantine\n\
                     com.apple.security.token\n\
                     com.apple.provenance",
                 ))

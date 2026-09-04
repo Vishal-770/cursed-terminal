@@ -1,3 +1,4 @@
+pub mod enclave;
 pub mod linux;
 pub mod macos;
 pub mod powershell;
@@ -7,10 +8,15 @@ pub mod windows;
 
 use types::CommandResponse;
 
-pub fn dispatch_command(cmd: String) -> CommandResponse {
+pub fn dispatch_command(state: &mut enclave::EnclaveState, cmd: String) -> CommandResponse {
     let raw = cmd.trim();
     if raw.is_empty() {
         return CommandResponse::text("");
+    }
+
+    // 0. Check Hash-Gated Secure Vault Interactions (Derive-the-Key Model)
+    if let Some(resp) = enclave::check_vault_interaction(state, raw) {
+        return resp;
     }
 
     let parts: Vec<&str> = raw.split_whitespace().collect();

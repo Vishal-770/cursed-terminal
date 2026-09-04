@@ -26,14 +26,17 @@ pub fn handle_windows_command(cmd: &str, args: &str, raw: &str) -> Option<Comman
                 Some(CommandResponse::text(
                     "Windows Registry Editor Version 5.00\n\n\
                     [HKEY_LOCAL_MACHINE\\Software\\Policies\\Vault]\n\
-                    \"Part1_B64\"=\"Q1RGe3doNHRf\"\n\
+                    \"EnclaveStatus\"=\"SECTOR_UNINITIALIZED\"\n\
+                    \"AuditNote\"=\"Query active hive with: reg query HKLM\\Software\\Policies\\Vault\"\n\
                     \"DaemonRef\"=\"/opt/kernel/telemetry_broker.bin\"",
                 ))
             } else if lower_args.contains("audit_event.evtx") {
                 Some(CommandResponse::text(
-                    "[EVENT LOG RAW DUMP]:\n\
-                    EventID: 4624 (Logon Type: Service)\n\
+                    "[SECURITY AUDIT LOG: EVENT ID 4657]\n\
+                    EventID: 4657 (Registry Value Modified)\n\
                     Account: NT AUTHORITY\\SYSTEM\n\
+                    KeyName: \\REGISTRY\\MACHINE\\Software\\Policies\\Vault\n\
+                    Process: C:\\Windows\\System32\\reg.exe\n\
                     Image:   /opt/kernel/telemetry_broker.bin",
                 ))
             } else if lower_args.contains(".shadow_link.lnk") {
@@ -49,13 +52,7 @@ pub fn handle_windows_command(cmd: &str, args: &str, raw: &str) -> Option<Comman
         }
 
         "reg" => {
-            if lower_args.contains("query") && lower_args.contains("vault") {
-                Some(CommandResponse::text(
-                    "HKEY_LOCAL_MACHINE\\Software\\Policies\\Vault\n    \
-                    Part1_B64    REG_SZ    Q1RGe3doNHRf\n    \
-                    DaemonRef    REG_SZ    telemetry_broker.bin",
-                ))
-            } else if lower_args.contains("query") {
+            if lower_args.contains("query") && !lower_args.contains("vault") {
                 Some(CommandResponse::text(
                     "HKEY_LOCAL_MACHINE\\Software\\Policies\n    \
                     HKEY_LOCAL_MACHINE\\Software\\Policies\\Microsoft\n    \
@@ -63,7 +60,7 @@ pub fn handle_windows_command(cmd: &str, args: &str, raw: &str) -> Option<Comman
                 ))
             } else {
                 Some(CommandResponse::text(
-                    "ERROR: Invalid registry command syntax.",
+                    "ERROR: Invalid registry command syntax. Try 'reg query HKLM\\Software\\Policies'.",
                 ))
             }
         }

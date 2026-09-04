@@ -6,21 +6,14 @@ pub fn handle_powershell_command(cmd: &str, args: &str, raw: &str) -> Option<Com
     let raw_lower = raw.to_lowercase();
 
     // Direct environment query: $env:FLAG_FINAL, $env:flag, etc.
-    if raw_lower.starts_with("$env:") {
-        if raw_lower.contains("flag_final") || raw_lower.contains("final") {
-            return Some(CommandResponse::with_sound(
-                "runn1ng?}",
-                "mario",
-            ));
-        } else {
-            return Some(CommandResponse::text(
-                "Name                           Value\n\
-                ----                           -----\n\
-                OS                             Windows_NT\n\
-                PATH                           C:\\Windows\\System32;C:\\Windows\n\
-                FLAG_FINAL                     runn1ng?}",
-            ));
-        }
+    if raw_lower.starts_with("$env:") && !raw_lower.contains("flag_final") {
+        return Some(CommandResponse::text(
+            "Name                           Value\n\
+            ----                           -----\n\
+            OS                             Windows_NT\n\
+            PATH                           C:\\Windows\\System32;C:\\Windows\n\
+            RUNSPACE_TARGET                $env:FLAG_FINAL",
+        ));
     }
 
     match lower.as_str() {
@@ -30,10 +23,10 @@ pub fn handle_powershell_command(cmd: &str, args: &str, raw: &str) -> Option<Com
                     "Name                           Value\n\
                     ----                           -----\n\
                     COMPUTERNAME                   SCHIZO-01\n\
-                    FLAG_FINAL                     runn1ng?}\n\
-                    HOMEDRIVE                      C:\n\
+                    HOMEDRIVE                      C:\\\n\
                     PROCESSOR_ARCHITECTURE         AMD64\n\
-                    PSExecutionPolicyPreference    Unrestricted",
+                    PSExecutionPolicyPreference    Unrestricted\n\
+                    RUNSPACE_TARGET                $env:FLAG_FINAL",
                 ))
             } else {
                 Some(CommandResponse::text(
@@ -48,28 +41,21 @@ pub fn handle_powershell_command(cmd: &str, args: &str, raw: &str) -> Option<Com
         }
 
         "get-variable" | "gv" => {
-            if lower_args.contains("flag") || lower_args.contains("final") {
-                Some(CommandResponse::text(
-                    "Name                           Value\n\
-                    ----                           -----\n\
-                    FLAG_FINAL                     runn1ng?}",
-                ))
-            } else {
-                Some(CommandResponse::text(
-                    "Name                           Value\n\
-                    ----                           -----\n\
-                    FLAG_FINAL                     runn1ng?}\n\
-                    ErrorActionPreference          Continue\n\
-                    PSVersionTable                 {PSVersion, PSEdition...}",
-                ))
-            }
+            Some(CommandResponse::text(
+                "Name                           Value\n\
+                ----                           -----\n\
+                MaximumHistoryCount            4096\n\
+                PSCulture                      en-US\n\
+                RUNSPACE_TARGET                $env:FLAG_FINAL",
+            ))
         }
 
         "get-content" | "gc" => {
             if lower_args.contains("registry") {
                 Some(CommandResponse::text(
                     "[HKEY_LOCAL_MACHINE\\Software\\Policies\\Vault]\n\
-                    \"Part1_B64\"=\"Q1RGe3doNHRf\"",
+                    \"EnclaveStatus\"=\"SECTOR_UNINITIALIZED\"\n\
+                    \"AuditNote\"=\"Query active hive with: reg query HKLM\\Software\\Policies\\Vault\"",
                 ))
             } else {
                 Some(CommandResponse::text(

@@ -40,10 +40,12 @@ pub fn handle_linux_command(cmd: &str, args: &str, _raw: &str) -> Option<Command
         }
 
         "cat" => {
-            if lower_args.contains("/proc/808/environ") || lower_args.contains(".shadow_cache") {
+            if lower_args.contains(".shadow_cache") {
                 Some(CommandResponse::text(
-                    "PART2_FRAGMENT=\"0s_4r3_\"\n\
-                    PATH_REF=\"/Volumes/MacintoshHD/Quarantine.plist\"",
+                    "[DAEMON ENVIRONMENT CACHE]:\n\
+                    Process: /opt/kernel/telemetry_broker.bin (PID 808)\n\
+                    Active Block: /proc/808/environ\n\
+                    Mount Reference: /Volumes/MacintoshHD/Quarantine.plist",
                 ))
             } else if lower_args.contains("/etc/passwd") {
                 Some(CommandResponse::text(
@@ -72,9 +74,9 @@ pub fn handle_linux_command(cmd: &str, args: &str, _raw: &str) -> Option<Command
             if lower_args.contains("808") || lower_args.contains("telemetry") {
                 Some(CommandResponse::text(
                     "GLIBC_2.38\n\
-                    PART2_FRAGMENT=0s_4r3_\n\
-                    PATH_REF=/Volumes/MacintoshHD/Quarantine.plist\n\
-                    AUTHORIZATION_SUCCESS",
+                    DAEMON_IDENTITY=telemetry_broker\n\
+                    ENVIRONMENT_MAP=/proc/808/environ\n\
+                    PATH_REF=/Volumes/MacintoshHD/Quarantine.plist",
                 ))
             } else {
                 Some(CommandResponse::text("Usage: strings <file>"))
@@ -82,10 +84,10 @@ pub fn handle_linux_command(cmd: &str, args: &str, _raw: &str) -> Option<Command
         }
 
         "grep" => {
-            if lower_args.contains("part2") || lower_args.contains("fragment") || lower_args.contains("shadow") {
+            if lower_args.contains("shadow") || lower_args.contains("telemetry") || lower_args.contains("environ") {
                 Some(CommandResponse::text(
-                    "/etc/.shadow_cache: PART2_FRAGMENT=\"0s_4r3_\"\n\
-                    /etc/.shadow_cache: PATH_REF=\"/Volumes/MacintoshHD/Quarantine.plist\"",
+                    "/etc/.shadow_cache: DAEMON_PID=\"808\"\n\
+                    /etc/.shadow_cache: ENVIRONMENT_BLOCK=\"/proc/808/environ\"",
                 ))
             } else {
                 Some(CommandResponse::text("grep: 0 matches found."))
@@ -180,13 +182,13 @@ pub fn handle_linux_command(cmd: &str, args: &str, _raw: &str) -> Option<Command
         "head" | "tail" => {
             if lower_args.contains("shadow") || lower_args.contains("808") {
                 Some(CommandResponse::text(
-                    "PART2_FRAGMENT=\"0s_4r3_\"\n\
-                    PATH_REF=\"/Volumes/MacintoshHD/Quarantine.plist\"",
+                    "DAEMON_IDENTITY=\"telemetry_broker\"\n\
+                    ENVIRONMENT_BLOCK=\"/proc/808/environ\"",
                 ))
             } else if lower_args.contains("registry") {
                 Some(CommandResponse::text(
                     "[HKEY_LOCAL_MACHINE\\Software\\Policies\\Vault]\n\
-                    \"Part1_B64\"=\"Q1RGe3doNHRf\"",
+                    \"EnclaveStatus\"=\"SECTOR_UNINITIALIZED\"",
                 ))
             } else {
                 Some(CommandResponse::text(
